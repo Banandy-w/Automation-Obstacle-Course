@@ -113,15 +113,11 @@ def TEST_fun_with_tables(browser):
     print(result)
     return result
 
-
-
-
-
 def TEST_not_a_table(browser):
     browser.get('https://obstaclecourse.tricentis.com/Obstacles/64161')
     wait = WebDriverWait(browser, 10)
 
-    print('Current Obstacle HARD: Not a table')
+    print('Current Obstacle 64161-HARD: Not a table')
     print('Click on Generate Order ID, takes the generated ID and enters it into the edit box. The generated id is randomly ordered in a table')
 
     try:
@@ -144,13 +140,45 @@ def TEST_not_a_table(browser):
     print(result)
     return result
 
+def TEST_and_counting(browser):
+    browser.get('https://obstaclecourse.tricentis.com/Obstacles/24499')
+    wait = WebDriverWait(browser, 10)
+
+    print('Current Obstacle 24499-HARD: And counting ')
+    print('Autocomplete Textbox: Type the given characters in the box, then count the entries and enter the number in the textbox. ')
+    try:
+        #Get the characters from the box
+        type_this = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'#typeThis'))).text
+
+        #Clicking the input box to ensure it is selected
+        input_box = browser.find_element(By.CSS_SELECTOR,'.select2').click()
+
+        #After clicking on the box, the input renders. Carefully select the input and send necessary keys
+        input_box = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'.select2-search__field'))).send_keys(type_this)
+
+        #Construct an Xpath that will select all the elments of the auto complete results. The length of that is the count needed to be inputted
+        auto_complete_list = browser.find_elements(By.XPATH,"//ul[@id='select2-autocomplete-results']//li")
+        #Input the count into the necessary input box
+        browser.find_element(By.CSS_SELECTOR,'#entryCount').send_keys(len(auto_complete_list))
+
+    except NoSuchElementException:
+        print('No Element found')
+    except TimeoutException:
+        print('Timed out')
+
+    #Sleep so user can verify momentarily test succeeded
+    time.sleep(2)
+    result = check_success(browser)
+    print(result)
+    return result
 def main():
     browser = webdriver.Firefox()
     
-    #TEST_ids_not_everything(browser)
-    #TEST_testing_methods(browser)
-    #TEST_not_a_table(browser)
+    TEST_ids_not_everything(browser)
+    TEST_testing_methods(browser)
+    TEST_not_a_table(browser)
     TEST_fun_with_tables(browser)
+    TEST_and_counting(browser)
 
 
     
