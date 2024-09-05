@@ -25,6 +25,24 @@ def check_success(browser):
     except AssertionError:
         print('Test failed. Please check results')
         return 'Test Failed'
+    
+def TEST_TEMPLATE(browser):
+    browser.get('Some website')
+    wait = WebDriverWait(browser, 10)
+
+    print('What is the current obstacle?')
+    try:
+        ...
+    except NoSuchElementException:
+        print('No Element found')
+    except TimeoutException:
+        print('Timed out')
+
+    #Sleep so user can verify momentarily test succeeded
+    time.sleep(2)
+    result = check_success(browser)
+    print(result)
+    return result
 
 def TEST_ids_not_everything(browser):
     
@@ -71,15 +89,55 @@ def TEST_testing_methods(browser):
     print(result)
     return result
 
+def TEST_fun_with_tables(browser):
+    browser.get('https://obstaclecourse.tricentis.com/Obstacles/92248')
+    wait = WebDriverWait(browser, 10)
+
+    print('Current Obstacle HARD: "Fun with tables"')
+    print('Complex Table interactions: Click the "edit" button for John Doe! ')
+    # Solution Construct an exact xpath.
+    # //tr//td[text()='John']//following-sibling::td[text()='Doe']//following::button[@name='edit']
+    #Breaking it down //tr specifies the table row. 
+    #//td[text()='John']//following-sibling::td[text()='Doe'] specifically looks for John Doe
+    #//following::button[@name='edit'] looks for the immediate edit buttom after "John Doe"
+
+    try:
+        wait.until(EC.element_to_be_clickable((By.XPATH,"//tr//td[text()='John']//following-sibling::td[text()='Doe']//following::button[@name='edit']"))).click()
+    except NoSuchElementException:
+        print('No Element found')
+    except TimeoutException:
+        print('Timed out')
+
+    time.sleep(2)
+    result = check_success(browser)
+    print(result)
+    return result
+
+
+
+
+
 def TEST_not_a_table(browser):
     browser.get('https://obstaclecourse.tricentis.com/Obstacles/64161')
     wait = WebDriverWait(browser, 10)
-    element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#generate'))).click
 
     print('Current Obstacle HARD: Not a table')
     print('Click on Generate Order ID, takes the generated ID and enters it into the edit box. The generated id is randomly ordered in a table')
 
+    try:
 
+        #Clicking on order_id generator
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#generate'))).click()
+        
+        #Getting order_id number
+        order_id = browser.find_element(By.XPATH, "//div[text()='order id']/following-sibling::div").text
+        #sending order_id number into necessary input field. Pressing Enter is not required as the test just checks for the numbers pasted
+        browser.find_element(By.CSS_SELECTOR, '#offerId').send_keys(order_id)
+
+    except NoSuchElementException:
+        print('No Element found')
+    except TimeoutException:
+        print('Timed out')
 
     time.sleep(2)
     result = check_success(browser)
@@ -88,11 +146,11 @@ def TEST_not_a_table(browser):
 
 def main():
     browser = webdriver.Firefox()
-    wait = WebDriverWait(browser, 10)
     
     #TEST_ids_not_everything(browser)
     #TEST_testing_methods(browser)
-    TEST_not_a_table(browser)
+    #TEST_not_a_table(browser)
+    TEST_fun_with_tables(browser)
 
 
     
