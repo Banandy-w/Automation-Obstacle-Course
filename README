@@ -1,3 +1,6 @@
-Run through these cases 
-http://www.uitestingplayground.com/
-https://obstaclecourse.tricentis.com/Obstacles/List
+# Goals
+* Practice automation by running through challenges found here https://obstaclecourse.tricentis.com/Obstacles/List
+* Do NOT implement a Page Object Model so you can further familiarize yourself with selenium or whatever framework used.
+
+
+
