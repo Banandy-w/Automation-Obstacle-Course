@@ -6,8 +6,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
+import time, os
+import xml.etree.ElementTree as ET
 
-import time
 
 
 #After succeeding in an obstacle, the browser dynamically changes with a pop up for success
@@ -25,6 +26,8 @@ def check_success(browser):
     except AssertionError:
         print('Test failed. Please check results')
         return 'Test Failed'
+    except NoSuchElementException:
+        print('Success pop up not visible')
     
 def TEST_TEMPLATE(browser):
     browser.get('Some website')
@@ -171,14 +174,54 @@ def TEST_and_counting(browser):
     result = check_success(browser)
     print(result)
     return result
+
+
+def TEST_be_fast_automate(browser):
+    browser.get('https://obstaclecourse.tricentis.com/Obstacles/87912')
+    wait = WebDriverWait(browser, 10)
+
+    print('Current Obstacle 87912-HARD: "Be fast - automate"')
+    print("Click load books which generates an XML structure. In the XML find the ISBN of 'Testing COmputer Software' and enter the ISBN in text box")
+    try:
+        #Getting the XML info as xml_books by using .get_attribute('value') on the element
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#loadbooks'))).click()
+        xml_books = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'#books'))).get_attribute('value')
+
+        #Writing the xml info into a file
+        with open('books.xml', 'w') as file:
+            file.write(xml_books)
+            file.close()
+
+        print('XML made, it can be found in ' + os.getcwd())
+
+        tree = ET.parse(r'C:\Projects\books.xml')
+        root = tree.getroot()
+        
+        isbn = root.findall(".//book[@title='Testing Computer Software']//isbn")
+        print(isbn)
+
+    except NoSuchElementException:
+        print('No Element found')
+    except TimeoutException:
+        print('Timed out')
+
+    #Sleep so user can verify momentarily test succeeded
+    time.sleep(2)
+    result = check_success(browser)
+    print(result)
+    return result
+
+
+
 def main():
     browser = webdriver.Firefox()
     
-    TEST_ids_not_everything(browser)
-    TEST_testing_methods(browser)
-    TEST_not_a_table(browser)
-    TEST_fun_with_tables(browser)
-    TEST_and_counting(browser)
+    #TEST_ids_not_everything(browser)
+    #TEST_testing_methods(browser)
+    #TEST_not_a_table(browser)
+    #TEST_fun_with_tables(browser)
+    #TEST_and_counting(browser)
+    TEST_be_fast_automate(browser)
 
 
     
