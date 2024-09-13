@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
-import time, os
+import time, os, re
 import xml.etree.ElementTree as ET
 
 
@@ -26,8 +26,9 @@ def check_success(browser):
     except AssertionError:
         print('Test failed. Please check results')
         return 'Test Failed'
-    except NoSuchElementException:
-        print('Success pop up not visible')
+    except TimeoutException:
+        print('Success pop up not visible. Test likely failed.')
+
     
 def TEST_TEMPLATE(browser):
     browser.get('Some website')
@@ -195,10 +196,11 @@ def TEST_be_fast_automate(browser):
         print('XML made, it can be found in ' + os.getcwd())
 
         tree = ET.parse(r'C:\Projects\books.xml')
-        root = tree.getroot()
+        #root = tree.getroot()
+        root = ET.fromstring(xml_books)
         
         isbn = root.findall(".//book[@title='Testing Computer Software']//isbn")
-        print(isbn)
+        print(root)
 
     except NoSuchElementException:
         print('No Element found')
@@ -211,17 +213,54 @@ def TEST_be_fast_automate(browser):
     print(result)
     return result
 
+def TEST_tough_cookie(browser):
+    browser.get('https://obstaclecourse.tricentis.com/Obstacles/45618/')
+    wait = WebDriverWait(browser, 10)
 
+    print('Current obstacle HARD - Tough cookie')
+    print('Random text string. The first edit box displays a random text that includes 3 large numbers. Extract the 3 numbers from the string and enter each into the according textbox.')
+    #Solution: Click on the trigger element. Selected the element again after the text is generated and save the text.
+    #Use Regex to filter the text numbers and input the text numbers as necessary
+    try:
+        trigger_element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#generated'))).click()
+
+        element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#generated')))
+        text = element.get_attribute('value')
+
+        regex_pattern = r'\d+'
+        filtered_text = re.findall(regex_pattern,text)
+        #print(filtered_text)
+
+        inputbox1 = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#firstNumber'))).send_keys(filtered_text[0])
+        inputbox2 = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#secondNumber'))).send_keys(filtered_text[1])
+        inputbox3 = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#thirdNumber'))).send_keys(filtered_text[2])
+        
+        #Test doesn't pass until the page is clicked on again
+        trigger_element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#generated'))).click()
+
+        
+    except NoSuchElementException:
+        print('No Element found')
+    except TimeoutException:
+        print('Timed out')
+
+    #Sleep so user can verify momentarily test succeeded
+    time.sleep(2)
+    result = check_success(browser)
+    print(result)
+    return result
 
 def main():
     browser = webdriver.Firefox()
     
-    #TEST_ids_not_everything(browser)
-    #TEST_testing_methods(browser)
-    #TEST_not_a_table(browser)
-    #TEST_fun_with_tables(browser)
-    #TEST_and_counting(browser)
-    TEST_be_fast_automate(browser)
+    TEST_ids_not_everything(browser)
+    TEST_testing_methods(browser)
+    TEST_not_a_table(browser)
+    TEST_fun_with_tables(browser)
+    TEST_and_counting(browser)
+    TEST_tough_cookie(browser)
+    #WIP TEST_be_fast_automate(browser)
+
 
 
     
